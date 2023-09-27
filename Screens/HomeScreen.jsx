@@ -45,7 +45,6 @@ const POSTS = [
 
 export default HomeScreen = ({ route, navigation }) => {
   const [posts, setPosts] = useState(POSTS);
-  console.log("posts:", posts)
 
 //   useEffect(() => {
 //     if (route.params) {

@@ -11,27 +11,123 @@ import {
   Image,
 } from "react-native";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Camera } from "expo-camera";
+import * as ImagePicker from "expo-image-picker";
+import * as MediaLibrary from "expo-media-library";
+import * as Location from "expo-location";
 
-export default function CreatePostsScreen() {
+export default function CreatePostsScreen({navigation}) {
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
+  const [hasPermission, setHasPermission] = useState(null);
+  const [location, setLocation] = useState(null);
+  const [convertedCoordinate, setConvertedCoordinate] = useState(null);
+  const [capturedPhoto, setCapturedPhoto] = useState(null);
+  const [namePost, setNamePost] = useState("");
+  const [isDisabledPublishBtn, setIsDisabledPublishBtn] = useState(false);
 
   const keyboardHide = () => {
     setIsShowKeyboard(false);
     Keyboard.dismiss();
-    // setState(initialState);
   };
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await Camera.requestCameraPermissionsAsync();
+      await MediaLibrary.requestPermissionsAsync();
+      await Location.requestForegroundPermissionsAsync();
+
+      setHasPermission(status === "granted");
+    })();
+  }, []);
+
+  useEffect(() => {
+    const disabled =
+      capturedPhoto !== null &&
+      namePost !== "" &&
+      convertedCoordinate !== null &&
+      location !== null
+        ? false
+        : true;
+
+    setIsDisabledPublishBtn(disabled);
+  }, [capturedPhoto, namePost, convertedCoordinate, location]);
+
+  if (hasPermission === null) {
+    return <View />;
+  }
+  if (hasPermission === false) {
+    return <Text>No access to camera</Text>;
+  }
+
+  const openCamera = async () => {
+    const result = await ImagePicker.launchCameraAsync();
+    console.log("result:", result);
+
+    if (!result.canceled && result.assets.length > 0) {
+      await MediaLibrary.createAssetAsync(result.assets[0].uri);
+      setCapturedPhoto(result.assets[0].uri);
+
+      const { coords } = await Location.getCurrentPositionAsync();
+      setLocation(coords);
+
+      const address = await Location.reverseGeocodeAsync({
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+      });
+
+      const { region, country } = address[0];
+
+      setConvertedCoordinate({ region, country });
+    }
+  };
+  const openGallery = async () => {
+    const galleryResult = await ImagePicker.launchImageLibraryAsync();
+
+    if (!galleryResult.canceled && galleryResult.assets.length > 0) {
+      setCapturedPhoto(galleryResult.assets[0].uri);
+
+      const { coords } = await Location.getCurrentPositionAsync();
+      setLocation(coords);
+
+      const address = await Location.reverseGeocodeAsync({
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+      });
+
+      const { region, country } = address[0];
+
+      setConvertedCoordinate({ region, country });
+    }
+  };
+
+  const publishPhoto = async () => {
+    if (location) {
+      // const photo = await uploadPhotoToServer(capturedPhoto);
+
+      // await writeDataToFirestore({
+      //   photo,
+      //   namePost,
+      //   location,
+      //   convertedCoordinate,
+      //   userId,
+      // });
+
+      navigation.navigate("PostsScreen");
+
+      setCapturedPhoto(null);
+      setNamePost("");
+      setLocation(null);
+      setConvertedCoordinate(null);
+    }
+  };
+
   return (
     <TouchableWithoutFeedback onPress={keyboardHide}>
-    <View style={styles.container}>
-
-        {/* <View style={styles.header}>
-          <Text style={styles.titel}>Створити публікацію</Text>
-        </View> */}
-
+      <View style={styles.container}>
         <View style={styles.posters}>
           <View style={styles.poster}>
-            <TouchableOpacity style={styles.camera}>
+            <TouchableOpacity style={styles.camera} onPress={openCamera}>
               <View>
                 <MaterialIcons
                   style={styles.iconCamera}
@@ -40,51 +136,70 @@ export default function CreatePostsScreen() {
                 />
               </View>
             </TouchableOpacity>
+            {capturedPhoto ? (
+              <Image
+                style={styles.previewImage}
+                source={{ uri: capturedPhoto }}
+              />
+            ) : (
+              null
+            )}
           </View>
 
-          <Text style={styles.textPoster}>Завантажте фото</Text>
-
-          <KeyboardAvoidingView
-                behavior={Platform.OS == "ios" ? "padding" : "height"}
-              >
-          <TextInput
-            value={""}
-            // onChangeText={setEmail}
-            placeholder="Назва..."
-            placeholderTextColor={"#bdbdbd"}
-            style={styles.input}
-            onFocus={() => setIsShowKeyboard(true)}
-          />
-          <TextInput
-            value={""}
-            // onChangeText={setEmail}
-            placeholder="Місцевість..."
-            placeholderTextColor={"#bdbdbd"}
-            style={styles.inputLocation}
-            onFocus={() => setIsShowKeyboard(true)}
-          />
-          <Feather style={styles.iconMapPin} name="map-pin" size={24} color="#bdbdbd" />
-          </KeyboardAvoidingView>
-
-          <TouchableOpacity style={styles.btnPost}>
-            <Text style={styles.btnPostText}>Опубліковати</Text>
-          </TouchableOpacity>
-
-          
-        
-
-        <View style={styles.tabBar}>
-          <TouchableOpacity style={styles.btnDelete}>
-            <Text style={styles.btnText}>
-              <Feather name="trash-2" size={24} color="#bdbdbd" />
+          <TouchableOpacity onPress={openGallery} >
+            <Text style={styles.cameraText}>
+              {capturedPhoto ? "Редагувати фото" : "Завантажте фото"}
             </Text>
           </TouchableOpacity>
-        </View>
 
+          <KeyboardAvoidingView
+            behavior={Platform.OS == "ios" ? "padding" : "height"}
+          >
+            <TextInput
+              style={styles.input}
+              placeholder="Назва..."
+              placeholderTextColor="#BDBDBD"
+              value={namePost.trimStart()}
+              onChangeText={setNamePost}
+              onFocus={() => setIsShowKeyboard(true)}
+            />
+            <TextInput
+              value={convertedCoordinate
+                ? `${convertedCoordinate.region}, ${convertedCoordinate.country}`
+                : null}
+              placeholder="Місцевість..."
+              placeholderTextColor={"#bdbdbd"}
+              style={styles.inputLocation}
+              onFocus={() => setIsShowKeyboard(true)}
+            />
+            <Feather
+              style={styles.iconMapPin}
+              name="map-pin"
+              size={24}
+              color="#bdbdbd"
+              onPress={() => navigation.navigate('Map')}
+            />
+          </KeyboardAvoidingView>
+
+          <TouchableOpacity style={isDisabledPublishBtn ? styles.btnPostDisabled : styles.btnPostCreate} onPress={publishPhoto} disabled={isDisabledPublishBtn}>
+            <Text style={isDisabledPublishBtn ? styles.btnPostText : {...styles.btnPostText, color: '#ffffff'}}>Опубліковати</Text>
+          </TouchableOpacity>
+
+          <View style={styles.tabBar}>
+            <TouchableOpacity style={styles.btnDelete} onPress={() => {
+              setCapturedPhoto(null);
+              setNamePost('');
+              setConvertedCoordinate(null);
+              console.log('Delete');
+            }}>
+              <Text style={styles.btnText}>
+                <Feather name="trash-2" size={24} color="#bdbdbd" />
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
-    </View>
+      </View>
     </TouchableWithoutFeedback>
-
   );
 }
 
@@ -123,6 +238,7 @@ const styles = StyleSheet.create({
     borderBottomColor: "#ffffff",
   },
   poster: {
+    position: "relative",
     height: 240,
     borderRadius: 8,
     backgroundColor: "#F6F6F6",
@@ -130,6 +246,11 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   camera: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [{ translateX: -30 }, { translateY: -30 }],
+    zIndex: 1,
     width: 60,
     height: 60,
     alignItems: "center",
@@ -142,18 +263,27 @@ const styles = StyleSheet.create({
   iconCamera: {
     color: "#BDBDBD",
   },
+  previewImage: {
+    height: 240,
+    borderRadius: 8,
+  },
   textPoster: {
     color: "#BDBDBD",
     fontSize: 16,
     fontWeight: "400",
     marginBottom: 32,
   },
+  cameraText: {
+    fontFamily: "Roboto-Regular",
+    fontSize: 16,
+    color: "#BDBDBD",
+  },
   input: {
-    marginTop: 16,
+    marginTop: 32,
     paddingTop: 16,
-    paddingLeft: 16,
+    paddingLeft: 0,
     paddingBottom: 15,
-    paddingRight: 16,
+    paddingRight: 0,
     borderWidth: 1,
     color: "#212121",
     fontSize: 16,
@@ -163,7 +293,6 @@ const styles = StyleSheet.create({
     borderRightColor: "#ffffff",
     borderLeftColor: "#ffffff",
     borderBottomColor: "#b2b2b2",
-
   },
   inputLocation: {
     position: "relative",
@@ -184,18 +313,29 @@ const styles = StyleSheet.create({
   },
   iconMapPin: {
     position: "absolute",
-    top: 95,
+    top: 110,
     left: 0,
   },
-  btnPost: {
+  btnPostDisabled: {
     width: "100%",
     height: 51,
     marginTop: 32,
-    backgroundColor: "#F6F6F6",
+    backgroundColor:  "#F6F6F6",
     borderRadius: 100,
     alignItems: "center",
     justifyContent: "center",
   },
+
+  btnPostCreate: {
+    width: "100%",
+    height: 51,
+    marginTop: 32,
+    backgroundColor: "#FF6C00",
+    borderRadius: 100,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
   btnPostText: {
     fontSize: 16,
     color: "#BDBDBD",

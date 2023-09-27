@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -10,14 +10,22 @@ import {
 
 } from "react-native";
 
-export default CommentsScreen = () => {
+export default CommentsScreen = ({ route, setTabBarStyle }) => {
+ console.log("route:", route)
  const [isShowKeyboard, setIsShowKeyboard] = useState(false);
   const [comment, setComment] = useState("");
 
+  useEffect(() => {
+    setTabBarStyle('none');
+
+    return () => {
+      setTabBarStyle('flex');
+    };
+  });
   const keyboardHide = () => {
     setIsShowKeyboard(false);
     Keyboard.dismiss();
-    console.log(comment);
+    // console.log(comment);
     setComment("");
   };
   return (

@@ -20,7 +20,7 @@ const NestedScreen = createStackNavigator();
 const MainTab = createBottomTabNavigator();
 
 
-export default PostsScreen = ({ navigation }) => {
+export default PostsScreen = ({ setTabBarStyle }) => {
 //   const dispatch = useDispatch();
 
   const signOut = () => {
@@ -38,7 +38,7 @@ export default PostsScreen = ({ navigation }) => {
               headerTitle: 'Публікації',
               headerTitleAlign: "center",
               headerTitleStyle: {
-                // fontFamily: "Roboto-Medium",
+                fontFamily: "Roboto-Medium",
                 fontSize: 17,
               },
               headerRight: () => (
@@ -58,7 +58,7 @@ export default PostsScreen = ({ navigation }) => {
           <NestedScreen.Screen
             options={{
               headerTitleStyle: {
-                // fontFamily: "Roboto-Medium",
+                fontFamily: "Roboto-Medium",
                 fontSize: 17,
               },
               headerBackTitleVisible: false,
@@ -72,18 +72,26 @@ export default PostsScreen = ({ navigation }) => {
               ),
             }}
             title="Коментарі"
-            component={CommentsScreen}
             name="Comments"
+          >
+            {({ route, navigation }) => (
+          <CommentsScreen
+            route={route}
+            navigation={navigation}
+            setTabBarStyle={setTabBarStyle}
           />
+        )}
+          </NestedScreen.Screen>
+
           <NestedScreen.Screen
             name="Map"
-            component={MapScreen}
             options={{
               title: "Карта",
               headerTitleStyle: {
                 // fontFamily: "Roboto-Medium",
                 fontSize: 17,
               },
+              
               headerBackTitleVisible: false,
               headerBackImage: () => (
                 <AntDesign
@@ -94,7 +102,15 @@ export default PostsScreen = ({ navigation }) => {
                 />
               ),
             }}
+          >
+            {({ route, navigation }) => (
+          <MapScreen
+            route={route}
+            navigation={navigation}
+            setTabBarStyle={setTabBarStyle}
           />
+        )}
+          </NestedScreen.Screen>
         </NestedScreen.Navigator>
         
     </View>

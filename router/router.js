@@ -1,15 +1,15 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
-
+import { useState } from 'react';
 import { StyleSheet, View, TouchableOpacity,} from "react-native";
 import { Ionicons, Feather, MaterialIcons, AntDesign } from "@expo/vector-icons";
 
 
-import RegistrationScreen from "./Screens/RegistrationScreen";
-import LoginScreen from "./Screens/LoginScreen";
-import PostsScreen from "./Screens/PostsScreen2";
-import CreatePostsScreen from "./Screens/CreatePostsScreen";
-import ProfileScreen from "./Screens/ProfileScreen";
+import RegistrationScreen from "../Screens/RegistrationScreen";
+import LoginScreen from "../Screens/LoginScreen";
+import PostsScreen from "../Screens/PostsScreen";
+import CreatePostsScreen from "../Screens/CreatePostsScreen";
+import ProfileScreen from "../Screens/ProfileScreen";
 
 
 
@@ -23,6 +23,7 @@ const MainTab = createBottomTabNavigator();
 
 
 export const useRoute = (isAuth) => {
+  const [tabBarStyle, setTabBarStyle] = useState('flex');
   if (!isAuth) {
     return (
       <MainStack.Navigator>
@@ -44,7 +45,7 @@ export const useRoute = (isAuth) => {
     <MainTab.Navigator
       screenOptions={{
         headerTitleStyle: {
-          // fontFamily: "Roboto-Medium",
+          fontFamily: "Roboto-Medium",
           fontSize: 17,
         },
         tabBarStyle: { height: 78,},
@@ -56,20 +57,21 @@ export const useRoute = (isAuth) => {
           tabBarShowLabel: false,
           headerBackVisible: false,
           headerShown: false,
-          
+          tabBarStyle: { display: tabBarStyle, height: 78, },
           tabBarIcon: ({ focused, size, color }) => (
-            <View style={{...styles.iconBottomView, backgroundColor: focused ? "#FF6C00" : "#FFFFFF",}}>
+            <View style={{...styles.iconBottomGrid, backgroundColor: focused ? "#FF6C00" : "#FFFFFF",}}>
                <Feather name="grid" size={size} color= {focused ? "white" : "#212121"} />
              </View>
             )
        }}
-        name="Posts"
-        component={PostsScreen}
-      />
+        name="PostsScreen"
+        // component={PostsScreen}
+      >{({navigation, route})=>(<PostsScreen setTabBarStyle={setTabBarStyle}/>)}</MainTab.Screen>
       
       <MainTab.Screen
         options={({ route, navigation: { goBack } }) => ({
           tabBarShowLabel: false,
+
           headerLeft: () => (
             <TouchableOpacity
               onPress={() => {goBack()}}>
@@ -81,19 +83,22 @@ export const useRoute = (isAuth) => {
               />
             </TouchableOpacity>
           ),
+
           headerTitleAlign: "center",
           headerTitleStyle: {
             // fontFamily: "Roboto-Medium",
             fontSize: 17,
           },
           title: "Створити публікацію",
+          tabBarStyle: { display: 'none' },
+
           tabBarIcon: ({ focused, size, color }) => (
-            <View style={{...styles.iconBottomView, backgroundColor: focused ? "#FF6C00" : "#FFFFFF",}}>
+            <View style={{...styles.iconBottomAdd, backgroundColor: focused ? "#FF6C00" : "#FFFFFF",}}>
                <MaterialIcons  name="add" size={size} color= {focused ? "white" : "#212121"}/>
              </View>
           )
         })}
-        name="Create"
+        name="CreatePostsScreen"
         component={CreatePostsScreen}
       />
 
@@ -103,7 +108,7 @@ export const useRoute = (isAuth) => {
 
           headerShown: false,
           tabBarIcon: ({ focused, size, color }) => (
-           <View style={{...styles.iconBottomView, backgroundColor: focused ? "#FF6C00" : "#FFFFFF",}}>
+           <View style={{...styles.iconBottomUser, backgroundColor: focused ? "#FF6C00" : "#FFFFFF",}}>
               <Feather name="user" size={size} color= {focused ? "white" : "#212121"} />
             </View>
           )
@@ -121,12 +126,27 @@ const styles = StyleSheet.create({
       color: "#BDBDBD",
       marginRight: 10,    
   },
-  iconBottomView: {
+  iconBottomGrid: {
+    marginLeft: 'auto',
       justifyContent: 'center',
       alignItems: 'center',
       width: 70,
       height: 40,
       borderRadius: 20,
-      backgroundColor: 'red',
-  }
+  },
+  iconBottomAdd: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 70,
+    height: 40,
+    borderRadius: 20,
+},
+iconBottomUser: {
+  marginRight: 'auto',
+  justifyContent: 'center',
+  alignItems: 'center',
+  width: 70,
+  height: 40,
+  borderRadius: 20,
+},
 })
