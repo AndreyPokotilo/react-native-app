@@ -2,8 +2,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
 import { useState } from 'react';
 import { StyleSheet, View, TouchableOpacity,} from "react-native";
-import { Ionicons, Feather, MaterialIcons, AntDesign } from "@expo/vector-icons";
-
+import { Feather, MaterialIcons, AntDesign } from "@expo/vector-icons";
 
 import RegistrationScreen from "../Screens/RegistrationScreen";
 import LoginScreen from "../Screens/LoginScreen";
@@ -11,20 +10,12 @@ import PostsScreen from "../Screens/PostsScreen";
 import CreatePostsScreen from "../Screens/CreatePostsScreen";
 import ProfileScreen from "../Screens/ProfileScreen";
 
-
-
-
-
 const MainStack = createStackNavigator();
 const MainTab = createBottomTabNavigator();
 
-
-
-
-
-export const useRoute = (isAuth) => {
+export const useRoute = (isLoggedIn) => {
   const [tabBarStyle, setTabBarStyle] = useState('flex');
-  if (!isAuth) {
+  if (!isLoggedIn) {
     return (
       <MainStack.Navigator>
         <MainStack.Screen
@@ -64,8 +55,7 @@ export const useRoute = (isAuth) => {
              </View>
             )
        }}
-        name="PostsScreen"
-        // component={PostsScreen}
+        name="Posts"
       >{({navigation, route})=>(<PostsScreen setTabBarStyle={setTabBarStyle}/>)}</MainTab.Screen>
       
       <MainTab.Screen
@@ -86,7 +76,7 @@ export const useRoute = (isAuth) => {
 
           headerTitleAlign: "center",
           headerTitleStyle: {
-            // fontFamily: "Roboto-Medium",
+            fontFamily: "Roboto-Medium",
             fontSize: 17,
           },
           title: "Створити публікацію",

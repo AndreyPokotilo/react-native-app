@@ -1,6 +1,4 @@
-// import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
-
 import {
   StyleSheet,
   Text,
@@ -13,29 +11,30 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import { logIn } from "../redux/auth/auth-operations";
+import { useDispatch } from "react-redux";
 
 const imgUrl = "https://s3-alpha-sig.figma.com/img/f6c9/a386/3060bf968d92368179ce26a756ce4271?Expires=1692576000&Signature=qrUy44TthC6gVW0tuTUUGCVq711Iw5l-Hzg1IGvJRZYcRUAK49R0dus-JxHYt~IJw9yPoKdGngAZH1r5mpsxDoqD-DY8Z65CtlIAU4BlvBooVE7ZKXd5PE~X0b79RKE03Mo67OodWmelq9SqL7uJ8vuNGcixNvKIOvJs1yUB~6bNhpxc4loRLUVeMlZcnOqUqxs-SSUARfiVHuHy~U8MBCWoNqmIGdxzJrKFTs~YvjgjLwIuzcupWFknKbaIxHFcldJw13b0blR62AjlfrKq~tbeKngWCxKYTBWBVZmRJse4bnG2CVM9FvftXCzbELOqIJHLV5VdET8gpa-95ooy~w__&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4";
 
 
 export default function LoginScreen({navigation}) {
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
-  // const [state, setState] = useState(initialState);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  const dispatch = useDispatch();
 
   const keyboardHide = () => {
     setIsShowKeyboard(false);
     Keyboard.dismiss();
-    // setState(initialState);
   };
 
 
   const handleSubmit = () => {
     setIsShowKeyboard(false);
     Keyboard.dismiss();
-    // dispatch(authSignInUser(state));
-    navigation.navigate("Posts");
-    // setState(initialState);
+    dispatch(logIn({email, password}));
+    // navigation.navigate("Posts");
   };
 
   return (

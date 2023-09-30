@@ -1,10 +1,12 @@
 import "react-native-gesture-handler";
-import React, { useState } from "react";
-import { NavigationContainer } from "@react-navigation/native";
-import { StyleSheet, View, TouchableOpacity,} from "react-native";
-import {useFonts} from "expo-font";
-
-import { useRoute } from "./router/router";
+import React, { useEffect } from "react";
+import * as Location from 'expo-location';
+import { StyleSheet } from "react-native";
+import { useFonts } from "expo-font";
+import { PersistGate } from "redux-persist/integration/react";
+import { Provider } from "react-redux";
+import { store, persistor } from "./redux/store";
+import { MainRout } from "./components/MainRout";
 
 export default function App() {
   const [fonts] = useFonts({
@@ -12,17 +14,28 @@ export default function App() {
     "Roboto-Medium": require("./assets/fonts/Roboto/Roboto-Medium.ttf"),
     "Roboto-Regular": require("./assets/fonts/Roboto/Roboto-Regular.ttf"),
   });
-  const [auth, setAuth] = useState(true)
-const routing = useRoute(auth)
 
-if (!fonts) {
-  return null;
-}
+  useEffect(() => {
+    (async () => {
+        const { status } =
+            await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+            setErrorMsg('Permission to access location was denied');
+            return;
+        }
+    })();
+}, []);
+
+  if (!fonts) {
+    return null;
+  }
 
   return (
-    <NavigationContainer>
-      {routing}
-    </NavigationContainer>
+    <Provider store={store}>
+      <PersistGate persistor={persistor}>
+        <MainRout />
+      </PersistGate>
+    </Provider>
   );
 }
 

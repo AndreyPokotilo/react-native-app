@@ -10,21 +10,21 @@ import HomeScreen from "./HomeScreen.jsx";
 
 import { AntDesign } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
-// import app from "../firebase/config.js";
 
 import { TouchableOpacity } from "react-native-gesture-handler";
 
-// import { authSignOutUser } from "../redux/auth/authOperations.js";
+import { logOut } from "../redux/auth/auth-operations.js";
+import { useDispatch } from "react-redux";
 
 const NestedScreen = createStackNavigator();
-const MainTab = createBottomTabNavigator();
+// const MainTab = createBottomTabNavigator();
 
 
 export default PostsScreen = ({ setTabBarStyle }) => {
-//   const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
   const signOut = () => {
-    // dispatch(authSignOutUser);
+    dispatch(logOut());
   };
 
   return (
@@ -44,7 +44,7 @@ export default PostsScreen = ({ setTabBarStyle }) => {
               headerRight: () => (
                 <TouchableOpacity onPress={signOut}>
                   <MaterialIcons
-                    style={{ marginRight: 10 }}
+                    style={{ marginRight: 15 }}
                     name="logout"
                     size={24}
                     color="#BDBDBD"

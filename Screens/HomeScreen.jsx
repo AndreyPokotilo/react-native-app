@@ -12,12 +12,17 @@ import { Ionicons } from "@expo/vector-icons";
 
 import { SimpleLineIcons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native-gesture-handler";
+import { useDispatch, useSelector } from "react-redux";
+import { selectedUid, selectedUser } from "../redux/auth/auth-selectors";
+import { selectedPosts } from "../redux/posts/posts-selectors";
+import { fetchAllPosts } from "../redux/posts/posts-operations";
 
 const POSTS = [
   {
     id: "1",
     title: "Ліс",
-    image: "https://s3-alpha-sig.figma.com/img/10eb/cad8/e6009416f2009943b9cd5d7f02695269?Expires=1693180800&Signature=JzQn3IxJmdO22ucg3SJxkjzBq335NdStPYajxFuDFnpnA5RV9s~fDXH3uanAB6S0vbYSrOt9fhF9AIAl-09dz-ImUNYIubDPYvzYTQFawn5Ohy0gk3rS~yeuRBpBbdRqZyJopzSnwU-DDUeBctZeO4F9luu1qKAKdZ6qxju-7KONnWeK9axHTD14z7rr8ormFOvtEmWBtt~VAsqViqqUn~euvg0B~P4gWhX7gAI3dEDK6rShjjaho6RRUmpkIgEOhHi~n7mq3~Fgktv68LKp2gXc8ALfzDfuIAn852~zit~RyG-94ThZ7iKbiE4dfo9aF6beUD3e4V6Zog55eYx5-w__&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4",
+    image:
+      "https://s3-alpha-sig.figma.com/img/10eb/cad8/e6009416f2009943b9cd5d7f02695269?Expires=1693180800&Signature=JzQn3IxJmdO22ucg3SJxkjzBq335NdStPYajxFuDFnpnA5RV9s~fDXH3uanAB6S0vbYSrOt9fhF9AIAl-09dz-ImUNYIubDPYvzYTQFawn5Ohy0gk3rS~yeuRBpBbdRqZyJopzSnwU-DDUeBctZeO4F9luu1qKAKdZ6qxju-7KONnWeK9axHTD14z7rr8ormFOvtEmWBtt~VAsqViqqUn~euvg0B~P4gWhX7gAI3dEDK6rShjjaho6RRUmpkIgEOhHi~n7mq3~Fgktv68LKp2gXc8ALfzDfuIAn852~zit~RyG-94ThZ7iKbiE4dfo9aF6beUD3e4V6Zog55eYx5-w__&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4",
     comments: "8",
     likes: "153",
     region: "Ivano-Frankivs'k Region",
@@ -26,7 +31,8 @@ const POSTS = [
   {
     id: "2",
     title: "Захід сонця над Чорним морем",
-    image: "https://s3-alpha-sig.figma.com/img/f15d/159f/a6ce3338a59841e1e3f926d58a5f2ae7?Expires=1693180800&Signature=qXou9ZEwqxgAXSUuXaRIILt606OVobW41v~ZyB9Eq-XZcaWswgV12~pDSBKOSnHNDpIox9Aj-we9g-w36-Xm2TAsWc6BLFZwym4YSqljYhV4WSuA72QUYnA11tMlZ-INFUlcloNYEuJ~zxCWZUAxbIuWHRH6G4vRLXrlD2YbqlwjDes6mFXpOQmixaH24aZHC4vXHb1KohCNBeIM2X3t7cpCFwcKNxeCwtAaRO2gCt0M~p5DTR6TEFp-U00TSS1Ezg7ZYKJpMf470P2nL33k7exAMcPpgV0Dn6Yj~6PUK0BLVPYiaQFCe1Nw9OCzs~-lAzhPcADyq0xJ4mGeS6yxMw__&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4",
+    image:
+      "https://s3-alpha-sig.figma.com/img/f15d/159f/a6ce3338a59841e1e3f926d58a5f2ae7?Expires=1693180800&Signature=qXou9ZEwqxgAXSUuXaRIILt606OVobW41v~ZyB9Eq-XZcaWswgV12~pDSBKOSnHNDpIox9Aj-we9g-w36-Xm2TAsWc6BLFZwym4YSqljYhV4WSuA72QUYnA11tMlZ-INFUlcloNYEuJ~zxCWZUAxbIuWHRH6G4vRLXrlD2YbqlwjDes6mFXpOQmixaH24aZHC4vXHb1KohCNBeIM2X3t7cpCFwcKNxeCwtAaRO2gCt0M~p5DTR6TEFp-U00TSS1Ezg7ZYKJpMf470P2nL33k7exAMcPpgV0Dn6Yj~6PUK0BLVPYiaQFCe1Nw9OCzs~-lAzhPcADyq0xJ4mGeS6yxMw__&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4",
     comments: "3",
     likes: "200",
     region: "Kherson region",
@@ -35,7 +41,8 @@ const POSTS = [
   {
     id: "3",
     title: "Маленький будиночок у Венеції",
-    image: "https://s3-alpha-sig.figma.com/img/5e97/0c74/9cd3abbfbe6ba44f66a368baac9c2839?Expires=1693180800&Signature=StqwMPnb4ur5Bo3ua6r0KJOtm8TY3rYXcecrNXhCcrTXsi6na4DHaHWm4PUZbUNnJ4QQwFKTAlli015NK-80xGDL7tuqe1oSct6~cxiSkzRmscW8X7P3RDeE3eIiRWbbe4J9qyKqoUsVTu2mvGFo7Lpr2PcY2OYA7TxfqCRLIIa0wofatIPJA6SY0j8Xs2y1nBNgCSBAFQE4ME3NeXiQ8sidk0~c7n291AeTbTy3tEbXFFHfIjBCGaIMcgNBW-9Eo4Yq2J0sfjJ8pYkuSbnBzY9uZ~k92g-R~bUe7KFxPq6usbUm0SvtQhqmGZ7oD2Q8PuBT40I6QmfIutgHVfxDAQ__&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4",
+    image:
+      "https://s3-alpha-sig.figma.com/img/5e97/0c74/9cd3abbfbe6ba44f66a368baac9c2839?Expires=1693180800&Signature=StqwMPnb4ur5Bo3ua6r0KJOtm8TY3rYXcecrNXhCcrTXsi6na4DHaHWm4PUZbUNnJ4QQwFKTAlli015NK-80xGDL7tuqe1oSct6~cxiSkzRmscW8X7P3RDeE3eIiRWbbe4J9qyKqoUsVTu2mvGFo7Lpr2PcY2OYA7TxfqCRLIIa0wofatIPJA6SY0j8Xs2y1nBNgCSBAFQE4ME3NeXiQ8sidk0~c7n291AeTbTy3tEbXFFHfIjBCGaIMcgNBW-9Eo4Yq2J0sfjJ8pYkuSbnBzY9uZ~k92g-R~bUe7KFxPq6usbUm0SvtQhqmGZ7oD2Q8PuBT40I6QmfIutgHVfxDAQ__&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4",
     comments: "50",
     likes: "200",
     region: "Venecia",
@@ -45,12 +52,19 @@ const POSTS = [
 
 export default HomeScreen = ({ route, navigation }) => {
   const [posts, setPosts] = useState(POSTS);
+  const dispatch = useDispatch();
+  const user = useSelector(selectedUser);
+  const uid = useSelector(selectedUid);
+  const { postsArray } = useSelector(selectedPosts);
+  console.log("postsArray:", postsArray)
 
-//   useEffect(() => {
-//     if (route.params) {
-//       setPosts((prevState) => [...prevState, route.params.state]);
-//     }
-//   }, [route.params]);
+  useEffect(() => {
+    
+      dispatch(fetchAllPosts(uid));
+    
+  }, [uid]);
+
+  if (!user) return;
   return (
     <View style={styles.container}>
       <View style={styles.user}>
@@ -66,7 +80,7 @@ export default HomeScreen = ({ route, navigation }) => {
           renderItem={({ item }) => (
             <View style={styles.postItem}>
               <Image
-                source={{uri: item.image, width: 60, height: 60}}
+                source={{ uri: item.image, width: 60, height: 60 }}
                 style={styles.postImage}
               />
               <Text style={styles.postTitle}>{item.title}</Text>

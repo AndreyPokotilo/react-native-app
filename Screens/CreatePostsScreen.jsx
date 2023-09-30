@@ -11,20 +11,28 @@ import {
   Image,
 } from "react-native";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
+import uuid from 'react-native-uuid';
 import React, { useState, useEffect } from "react";
 import { Camera } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import * as MediaLibrary from "expo-media-library";
 import * as Location from "expo-location";
+import { useDispatch, useSelector } from "react-redux";
+import { addPost } from "../redux/posts/posts-operations";
+import { selectedUid } from "../redux/auth/auth-selectors";
 
-export default function CreatePostsScreen({navigation}) {
+export default function CreatePostsScreen({ navigation }) {
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
+  
   const [hasPermission, setHasPermission] = useState(null);
   const [location, setLocation] = useState(null);
   const [convertedCoordinate, setConvertedCoordinate] = useState(null);
   const [capturedPhoto, setCapturedPhoto] = useState(null);
   const [namePost, setNamePost] = useState("");
+
   const [isDisabledPublishBtn, setIsDisabledPublishBtn] = useState(false);
+  const uid = useSelector(selectedUid);
+  const dispatch = useDispatch();
 
   const keyboardHide = () => {
     setIsShowKeyboard(false);
@@ -62,7 +70,6 @@ export default function CreatePostsScreen({navigation}) {
 
   const openCamera = async () => {
     const result = await ImagePicker.launchCameraAsync();
-    console.log("result:", result);
 
     if (!result.canceled && result.assets.length > 0) {
       await MediaLibrary.createAssetAsync(result.assets[0].uri);
@@ -103,17 +110,19 @@ export default function CreatePostsScreen({navigation}) {
 
   const publishPhoto = async () => {
     if (location) {
-      // const photo = await uploadPhotoToServer(capturedPhoto);
 
-      // await writeDataToFirestore({
-      //   photo,
-      //   namePost,
-      //   location,
-      //   convertedCoordinate,
-      //   userId,
-      // });
+      const newPost={
+          id: uuid.v4(10),
+          titel: namePost,
+          image: capturedPhoto,
+          comments: "",
+          likes: "",
+          region: convertedCoordinate.region,
+          state: convertedCoordinate.country,
+        };
 
-      navigation.navigate("PostsScreen");
+      dispatch(addPost({uid, newPost}));
+      navigation.navigate("Posts");
 
       setCapturedPhoto(null);
       setNamePost("");
@@ -141,12 +150,10 @@ export default function CreatePostsScreen({navigation}) {
                 style={styles.previewImage}
                 source={{ uri: capturedPhoto }}
               />
-            ) : (
-              null
-            )}
+            ) : null}
           </View>
 
-          <TouchableOpacity onPress={openGallery} >
+          <TouchableOpacity onPress={openGallery}>
             <Text style={styles.cameraText}>
               {capturedPhoto ? "Редагувати фото" : "Завантажте фото"}
             </Text>
@@ -164,9 +171,11 @@ export default function CreatePostsScreen({navigation}) {
               onFocus={() => setIsShowKeyboard(true)}
             />
             <TextInput
-              value={convertedCoordinate
-                ? `${convertedCoordinate.region}, ${convertedCoordinate.country}`
-                : null}
+              value={
+                convertedCoordinate
+                  ? `${convertedCoordinate.region}, ${convertedCoordinate.country}`
+                  : null
+              }
               placeholder="Місцевість..."
               placeholderTextColor={"#bdbdbd"}
               style={styles.inputLocation}
@@ -177,21 +186,40 @@ export default function CreatePostsScreen({navigation}) {
               name="map-pin"
               size={24}
               color="#bdbdbd"
-              onPress={() => navigation.navigate('Map')}
+              onPress={() => navigation.navigate("Map")}
             />
           </KeyboardAvoidingView>
 
-          <TouchableOpacity style={isDisabledPublishBtn ? styles.btnPostDisabled : styles.btnPostCreate} onPress={publishPhoto} disabled={isDisabledPublishBtn}>
-            <Text style={isDisabledPublishBtn ? styles.btnPostText : {...styles.btnPostText, color: '#ffffff'}}>Опубліковати</Text>
+          <TouchableOpacity
+            style={
+              isDisabledPublishBtn
+                ? styles.btnPostDisabled
+                : styles.btnPostCreate
+            }
+            onPress={publishPhoto}
+            disabled={isDisabledPublishBtn}
+          >
+            <Text
+              style={
+                isDisabledPublishBtn
+                  ? styles.btnPostText
+                  : { ...styles.btnPostText, color: "#ffffff" }
+              }
+            >
+              Опубліковати
+            </Text>
           </TouchableOpacity>
 
           <View style={styles.tabBar}>
-            <TouchableOpacity style={styles.btnDelete} onPress={() => {
-              setCapturedPhoto(null);
-              setNamePost('');
-              setConvertedCoordinate(null);
-              console.log('Delete');
-            }}>
+            <TouchableOpacity
+              style={styles.btnDelete}
+              onPress={() => {
+                setCapturedPhoto(null);
+                setNamePost("");
+                setConvertedCoordinate(null);
+                console.log("Delete");
+              }}
+            >
               <Text style={styles.btnText}>
                 <Feather name="trash-2" size={24} color="#bdbdbd" />
               </Text>
@@ -246,9 +274,9 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   camera: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
+    position: "absolute",
+    top: "50%",
+    left: "50%",
     transform: [{ translateX: -30 }, { translateY: -30 }],
     zIndex: 1,
     width: 60,
@@ -320,7 +348,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 51,
     marginTop: 32,
-    backgroundColor:  "#F6F6F6",
+    backgroundColor: "#F6F6F6",
     borderRadius: 100,
     alignItems: "center",
     justifyContent: "center",

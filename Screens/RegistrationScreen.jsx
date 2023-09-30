@@ -1,6 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
-
+import { useDispatch } from 'react-redux';
 import {
   StyleSheet,
   Text,
@@ -14,25 +14,31 @@ import {
   Platform,
 } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
+import { register } from "../redux/auth/auth-operations";
 
 const imgUrl =
   "https://s3-alpha-sig.figma.com/img/f6c9/a386/3060bf968d92368179ce26a756ce4271?Expires=1692576000&Signature=qrUy44TthC6gVW0tuTUUGCVq711Iw5l-Hzg1IGvJRZYcRUAK49R0dus-JxHYt~IJw9yPoKdGngAZH1r5mpsxDoqD-DY8Z65CtlIAU4BlvBooVE7ZKXd5PE~X0b79RKE03Mo67OodWmelq9SqL7uJ8vuNGcixNvKIOvJs1yUB~6bNhpxc4loRLUVeMlZcnOqUqxs-SSUARfiVHuHy~U8MBCWoNqmIGdxzJrKFTs~YvjgjLwIuzcupWFknKbaIxHFcldJw13b0blR62AjlfrKq~tbeKngWCxKYTBWBVZmRJse4bnG2CVM9FvftXCzbELOqIJHLV5VdET8gpa-95ooy~w__&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4";
 
 export default function RegistrationScreen({ navigation }) {
-  // const [state, setState] = useState(initialState);
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
-  const [login, setLogin] = useState("");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const dispatch = useDispatch();
 
   const keyboardHide = () => {
     setIsShowKeyboard(false);
     Keyboard.dismiss();
-    // setState(initialState);
   };
 
   const onSubmit = () => {
-    console.log({ login: login, email: email, password: password });
+    // console.log({ name: name, email: email, password: password });
+    dispatch(register({ name, email, password }));
+    Keyboard.dismiss();
+    setName('');
+    setEmail('');
+    setPassword('');
   };
 
   return (
@@ -59,8 +65,8 @@ export default function RegistrationScreen({ navigation }) {
                 behavior={Platform.OS == "ios" ? "padding" : "height"}
               >
                 <TextInput
-                  value={login}
-                  onChangeText={setLogin}
+                  value={name}
+                  onChangeText={setName}
                   placeholder="Логін"
                   placeholderTextColor={"#bdbdbd"}
                   style={styles.input}
