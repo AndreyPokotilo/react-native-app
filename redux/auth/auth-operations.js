@@ -16,7 +16,6 @@ const register = createAsyncThunk(
 
         try {
             const response = await createUserWithEmailAndPassword(auth, email, password);
-            // console.log("response:", response)
 
             if (!response.user.displayName) {
                 await updateProfile(auth.currentUser, { displayName: name });
@@ -50,7 +49,6 @@ const logIn = createAsyncThunk(
                 email,
                 password
             );
-
             const credentials = {
                 user: {
                     name: response.user.displayName,
@@ -58,7 +56,6 @@ const logIn = createAsyncThunk(
                 },
                 uid: response.user.uid,
             };
-
             return credentials;
         } catch (error) {
             console.log('2: ', error.message);
@@ -82,13 +79,14 @@ const logOut = createAsyncThunk(
 const checkUser = () => async (dispatch, _) => {
     try {
         onAuthStateChanged(auth, (user) => {
+            // console.log("user:", user)
+            
             if (!user) return;
 
             const credentials = {
                 user: { name: user.displayName, email: user.email },
                 uid: user.uid,
             };
-            console.log("credentialsCheckUser:", credentials)
 
             dispatch(logIn(credentials));
         });

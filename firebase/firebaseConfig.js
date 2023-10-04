@@ -3,8 +3,6 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
-// const API_KEY = import.meta.env.VITE_API_KEY
-
 const firebaseConfig = {
     apiKey: "AIzaSyCVoChC0imZxC4cVJ-dwu-VLDPg-RnQ5IU",
     authDomain: "reac-native-app-8af51.firebaseapp.com",
@@ -15,10 +13,6 @@ const firebaseConfig = {
   };
 
 const app = initializeApp(firebaseConfig);
-
 export const auth = getAuth(app);
-// console.log("auth:", auth)
 export const db = getFirestore(app);
-console.log("db:", db)
 export const storage = getStorage(app);
-console.log("storage:", storage)

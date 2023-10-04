@@ -7,56 +7,90 @@ import {
   TextInput,
   TouchableWithoutFeedback,
   Keyboard,
-
+  Alert,
 } from "react-native";
+import { AntDesign } from "@expo/vector-icons";
+import { addComment, fetchAllPosts } from "../redux/posts/posts-operations";
+import { useDispatch, useSelector } from "react-redux";
+import { Comment } from "../components/Comment/Comment";
+import { selectedUid } from "../redux/auth/auth-selectors";
+import uuid from "react-native-uuid";
+import { selectedPosts } from "../redux/posts/posts-selectors";
 
 export default CommentsScreen = ({ route, setTabBarStyle }) => {
- console.log("route:", route)
- const [isShowKeyboard, setIsShowKeyboard] = useState(false);
+  const [isShowKeyboard, setIsShowKeyboard] = useState(false);
   const [comment, setComment] = useState("");
+  const [commentsArray, setCommentsArray] = useState([]);
+
+  const dispatch = useDispatch();
+
+  const currentId = route.params.id;
+  const imgUrl = route.params.image;
+
+  const uid = useSelector(selectedUid);
+  const postsArray = useSelector(selectedPosts);
+
+  const postCurrent = postsArray.filter((post) => post.id === currentId);
 
   useEffect(() => {
-    setTabBarStyle('none');
+    const value = postCurrent.map(({ comments }) => comments);
+    setCommentsArray(...value);
+  }, [postsArray]);
+
+  useEffect(() => {
+    setTabBarStyle("none");
 
     return () => {
-      setTabBarStyle('flex');
+      setTabBarStyle("flex");
     };
   });
+
   const keyboardHide = () => {
     setIsShowKeyboard(false);
     Keyboard.dismiss();
-    // console.log(comment);
+  };
+
+  const onSubmit = () => {
+    if (comment === "") {
+      Alert.alert("Please add comment");
+      return;
+    }
+    const newComment = {
+      id: uuid.v4(2),
+      text: comment,
+      date: Date.now(),
+    };
+    dispatch(addComment({ currentId, comment: newComment }));
+
     setComment("");
   };
+
   return (
     <TouchableWithoutFeedback onPress={keyboardHide}>
       <View style={styles.container}>
         <View style={styles.commentsSection}>
-          <Image
-            style={styles.image}
-            source={require("../assets/post-mauntains.jpg")}
-          />
+          <Image style={styles.image} source={{ uri: imgUrl }} />
           <View style={styles.commentsList}>
-            <View style={styles.commentItem}>
-              <Image source={require("../assets/comment-avatar-1.png")} />
-              <View style={styles.comment}>
-                <Text style={styles.commentText}>
-                  Really love your most recent photo. I’ve been trying to
-                  capture the same thing for a few months and would love some
-                  tips!
-                </Text>
-                <Text style={styles.commentDate}>09 липня, 2020 | 08:40</Text>
-              </View>
-            </View>
+            {commentsArray.map((comment, indx) => (
+              <Comment key={indx} comment={comment} />
+            ))}
           </View>
         </View>
-        <TextInput
-          placeholder="Коментувати..."
-          value={comment}
-          style={styles.toComment}
-          onFocus={() => setIsShowKeyboard(true)}
-          onChangeText={setComment}
-        />
+        <View style={styles.inputWrapper}>
+          <TextInput
+            placeholder="Коментувати..."
+            value={comment}
+            style={styles.toComment}
+            onFocus={() => setIsShowKeyboard(true)}
+            onChangeText={(value) => setComment(value)}
+          />
+          <AntDesign
+            name="arrowup"
+            size={26}
+            style={styles.commentIcon}
+            onPress={onSubmit}
+          />
+        </View>
       </View>
     </TouchableWithoutFeedback>
   );
@@ -76,7 +110,7 @@ const styles = StyleSheet.create({
     paddingBottom: 11,
   },
   title: {
-    // fontFamily: "Roboto-Medium",
+    fontFamily: "Roboto-Medium",
     color: "#212121",
     textAlign: "center",
     fontSize: 17,
@@ -87,35 +121,15 @@ const styles = StyleSheet.create({
   },
   image: { width: "100%", height: 240, borderRadius: 8 },
   commentsList: { marginTop: 32 },
-  commentItem: { flexDirection: "row" },
+
   commentAvatar: {
     width: 28,
     height: 28,
     borderRadius: "50%",
   },
-  comment: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.03)",
-    marginLeft: 16,
-    padding: 16,
-    borderTopRightRadius: 6,
-    borderBottomLeftRadius: 6,
-    borderBottomRightRadius: 6,
-  },
-  commentText: {
-    // fontFamily: "Roboto-Regular",
-    fontSize: 13,
-    color: "rgba(33, 33, 33, 1)",
-  },
-  commentDate: {
-    // fontFamily: "Roboto-Regular",
-    fontSize: 10,
-    color: "rgba(189, 189, 189, 1)",
-    textAlign: "right",
-    marginTop: 8,
-  },
   toComment: {
-    // fontFamily: "Roboto-Regular",
+    position: "relative",
+    fontFamily: "Roboto-Regular",
     fontSize: 16,
     height: 50,
     color: "#000000",
@@ -124,7 +138,19 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     width: "100%",
     paddingLeft: 16,
+    paddingRight: 45,
     paddingTop: 16,
     paddingBottom: 15,
+  },
+  commentIcon: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    padding: 4,
+    borderRadius: 50,
+    color: "#FFFFFF",
+    backgroundColor: "#FF6C00",
+    width: 34,
+    height: 34,
   },
 });

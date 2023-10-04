@@ -6,7 +6,7 @@ import { useFonts } from "expo-font";
 import { PersistGate } from "redux-persist/integration/react";
 import { Provider } from "react-redux";
 import { store, persistor } from "./redux/store";
-import { MainRout } from "./components/MainRout";
+import { MainRout } from "./components/MainRout/MainRout";
 
 export default function App() {
   const [fonts] = useFonts({

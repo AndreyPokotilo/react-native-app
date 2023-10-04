@@ -16,7 +16,7 @@ import { postsReducer } from './posts/posts-slice';
 const persistConfig = {
   key: 'auth',
   storage: AsyncStorage,
-  whitelist: ['user'],
+  // whitelist: ['user'],
 };
 
 

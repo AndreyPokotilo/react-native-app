@@ -14,8 +14,7 @@ import {
 import { logIn } from "../redux/auth/auth-operations";
 import { useDispatch } from "react-redux";
 
-const imgUrl = "https://s3-alpha-sig.figma.com/img/f6c9/a386/3060bf968d92368179ce26a756ce4271?Expires=1692576000&Signature=qrUy44TthC6gVW0tuTUUGCVq711Iw5l-Hzg1IGvJRZYcRUAK49R0dus-JxHYt~IJw9yPoKdGngAZH1r5mpsxDoqD-DY8Z65CtlIAU4BlvBooVE7ZKXd5PE~X0b79RKE03Mo67OodWmelq9SqL7uJ8vuNGcixNvKIOvJs1yUB~6bNhpxc4loRLUVeMlZcnOqUqxs-SSUARfiVHuHy~U8MBCWoNqmIGdxzJrKFTs~YvjgjLwIuzcupWFknKbaIxHFcldJw13b0blR62AjlfrKq~tbeKngWCxKYTBWBVZmRJse4bnG2CVM9FvftXCzbELOqIJHLV5VdET8gpa-95ooy~w__&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4";
-
+const imgUrl = "https://s3-alpha-sig.figma.com/img/f6c9/a386/3060bf968d92368179ce26a756ce4271?Expires=1696809600&Signature=Z39U2RkomJaTwNklRQl1Khdwu6aDOy0pmwFo4pgD3m9LQmWK0iTmkNZ3cYlU859povPpJOZA~YUAA2Q-crZ5IFWdMWNE9N5el2MwIeakHLDKIq4iZCJjrBb9IyrA7drYMH1PQEAxJ016dyehWQJAPtD7rF5qeMpYLIdqbKdFtvHIUGWusBS687vX-Tj5QDlJ8mtqniN8QVh86lbcok3NsazEYmu-1E7SQdj94VCUAIahARe946tGrC5KqnVqEmiQTzECfwXPjcmJ03u2IPpIF30d5aOhw9qMR2vtIlkBQbXP1Njz3l8K4LenZx8bMx3resnv2pR4yV-htpXX-6gduQ__&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4"
 
 export default function LoginScreen({navigation}) {
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
@@ -34,7 +33,6 @@ export default function LoginScreen({navigation}) {
     setIsShowKeyboard(false);
     Keyboard.dismiss();
     dispatch(logIn({email, password}));
-    // navigation.navigate("Posts");
   };
 
   return (
@@ -43,6 +41,7 @@ export default function LoginScreen({navigation}) {
         <ImageBackground
           source={{uri: imgUrl}}
           style={styles.image}
+          resizeMode = "cover"
         >
           <View
             style={{ ...styles.login, marginTop: isShowKeyboard ? 273 : 323 }}
@@ -53,6 +52,7 @@ export default function LoginScreen({navigation}) {
                 behavior={Platform.OS == "ios" ? "padding" : "height"}
               >
                 <TextInput
+                  autoComplete="email"
                   value={email}
                   onChangeText={setEmail}
                   placeholder="Адреса електронної пошти"
@@ -100,7 +100,8 @@ const styles = StyleSheet.create({
   },
   image: {
     flex: 1,
-    resizeMode: "cover",
+    
+    justifyContent: 'center',
     height: 812,
   },
   login: {

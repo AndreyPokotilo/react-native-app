@@ -18,7 +18,7 @@ import * as ImagePicker from "expo-image-picker";
 import * as MediaLibrary from "expo-media-library";
 import * as Location from "expo-location";
 import { useDispatch, useSelector } from "react-redux";
-import { addPost } from "../redux/posts/posts-operations";
+import { addPost, uploadPhotoToServer } from "../redux/posts/posts-operations";
 import { selectedUid } from "../redux/auth/auth-selectors";
 
 export default function CreatePostsScreen({ navigation }) {
@@ -29,6 +29,7 @@ export default function CreatePostsScreen({ navigation }) {
   const [convertedCoordinate, setConvertedCoordinate] = useState(null);
   const [capturedPhoto, setCapturedPhoto] = useState(null);
   const [namePost, setNamePost] = useState("");
+  console.log("namePost:", namePost)
 
   const [isDisabledPublishBtn, setIsDisabledPublishBtn] = useState(false);
   const uid = useSelector(selectedUid);
@@ -111,18 +112,24 @@ export default function CreatePostsScreen({ navigation }) {
   const publishPhoto = async () => {
     if (location) {
 
+      const photo = await uploadPhotoToServer(capturedPhoto);
+
       const newPost={
-          id: uuid.v4(10),
+          id: uuid.v4(8),
+          userId: uid,
           titel: namePost,
-          image: capturedPhoto,
-          comments: "",
-          likes: "",
+          image: photo,
+          comments: [],
+          likeUserId: [],
+          likes: 0,
+          location: {latitude: location.latitude, longitude: location.longitude},
           region: convertedCoordinate.region,
           state: convertedCoordinate.country,
         };
-
-      dispatch(addPost({uid, newPost}));
+        if(photo) {
+        dispatch(addPost({uid,newPost}));
       navigation.navigate("Posts");
+    }
 
       setCapturedPhoto(null);
       setNamePost("");
